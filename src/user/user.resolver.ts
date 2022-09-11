@@ -17,14 +17,14 @@ export class UserResolver {
     return users;
   }
 
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   @Query(() => User)
   async user(@Args('id') id: string): Promise<User> {
     const user = await this.userService.findUserById(id);
     return user;
   }
 
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   @Query(() => User)
   async userbyEmail(@Args('email') email: string): Promise<User> {
     const user = await this.userService.findUserByEmail(email);
@@ -33,7 +33,6 @@ export class UserResolver {
   @Mutation(() => User)
   async createUser(@Args('data') data: CreateUserInput): Promise<User> {
     const user = await this.userService.store(data);
-
     return user;
   }
 
@@ -47,7 +46,7 @@ export class UserResolver {
     return user;
   }
 
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean)
   async DeleteUser(@Args('id') id: string): Promise<boolean> {
     const deletedUser = await this.userService.deleteUser(id);

@@ -29,6 +29,10 @@ import {
       //   ApolloServerPluginLandingPageLocalDefault({ embed: true }),
       // ],
       // introspection: true,
+      cors: {
+        origin: 'http://localhost:3000',
+        credentials: true,
+      },
     }),
     UserModule,
     AuthModule,

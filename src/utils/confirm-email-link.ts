@@ -10,6 +10,5 @@ export const confirmationEmail = async (userId: string) => {
   const id = v4();
   await redis.set(id, userId, 'EX', 60 * 60 * 15);
   const link = `http://localhost:${process.env.PORT}/user/confirm/${id}`;
-  console.log(link);
   return link;
 };

@@ -10,7 +10,12 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.enableCors();
+  app.enableCors({
+    // wrong!  in my case, anyway
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: '*',
+    credentials: true,
+  });
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

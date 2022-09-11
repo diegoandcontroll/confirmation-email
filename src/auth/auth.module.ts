@@ -19,7 +19,7 @@ import { TokenModule } from 'src/token/token.module';
       useFactory: () => ({
         secret: `${process.env.JWT_SECRET}`,
         signOptions: {
-          expiresIn: '60s',
+          expiresIn: '30s',
         },
       }),
     }),

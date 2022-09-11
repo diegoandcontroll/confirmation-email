@@ -5,8 +5,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
-import { hashPasswordTransform } from 'src/utils/hash';
+import { hashSync } from 'bcrypt';
 @ObjectType()
 @Entity()
 export class User {
@@ -26,9 +27,7 @@ export class User {
   @Column({ name: 'photo_url' })
   photoUrl: string;
 
-  @Column({
-    transformer: hashPasswordTransform,
-  })
+  @Column()
   @HideField()
   password: string;
 
@@ -37,4 +36,9 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @BeforeInsert()
+  hashPassword() {
+    this.password = hashSync(this.password, 10);
+  }
 }

@@ -1,21 +1,26 @@
 import * as nodemailer from 'nodemailer';
 
-export async function mainNodeMailer(email: string, link: string) {
+export async function mainNodeMailer(
+  email: string,
+  name: string,
+  link: string,
+) {
   const transport = nodemailer.createTransport({
-    service: 'gmail',
+    service: 'SendinBlue',
     auth: {
       user: process.env.NODE_MAILER_USER,
-      pass: process.env.API_KEY,
+      pass: process.env.API_PASSWORD_SMTP,
     },
-    port: 456,
-    host: 'smtp.gmail.com',
+    port: 587,
+    host: 'smtp-relay.sendinblue.com',
   });
   const mailOptions = {
-    from: 'fake@vintomaper.com',
+    from: 'lukasxdp@gmail.com',
     to: email,
-    subject: `Sending email with nodemailer and GmailSTMP`,
-    text: 'Hellow World',
-    html: `<b>Hello world?</b> <a href="${link}" tagert="__blank">Confirmation Email</a>`,
+    subject: `[CONFIRM EMAIL] Important`,
+    text: 'Confirm email',
+    html: `<b>Hellow ${name} Confirm email open link !</b> 
+    <a href="${link}" tagert="_blank">Confirmation Email</a>`,
   };
 
   transport.sendMail(mailOptions, function (error, response) {
