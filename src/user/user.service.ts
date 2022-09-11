@@ -12,7 +12,7 @@ import { UpdateUserInput } from './dto/update-user.dto';
 import { UpdateUserInterface } from './interfaces/user-updated.interface';
 import { User } from './user.entity';
 import { hashSync } from 'bcrypt';
-import SendmailTransport from 'nodemailer/lib/sendmail-transport';
+
 import { confirmationEmail, redis } from 'src/utils/confirm-email-link';
 import { mainNodeMailer } from 'src/utils/nodemailer';
 import { Response } from 'express';
@@ -24,7 +24,7 @@ export class UserService {
   ) {}
 
   async find(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository.findBy({ confirmed: true });
   }
 
   async store(data: CreateUserInput): Promise<User> {
@@ -51,7 +51,11 @@ export class UserService {
           'Error to create user try again later...',
         );
       }
-      await mainNodeMailer(data.email, await confirmationEmail(userSaved.id));
+      await mainNodeMailer(
+        data.email,
+        userSaved.name,
+        await confirmationEmail(userSaved.id),
+      );
       return userSaved;
     } catch (err) {
       return err;
@@ -83,10 +87,32 @@ export class UserService {
 
     const user = await this.findUserById(id);
 
-    if (data.password) data.password = hashSync(data.password, 10);
+    if (!user) {
+      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+    }
 
-    await this.userRepository.update(id, data);
-
+    if (data.photoUrl === '') {
+      data.photoUrl = user.photoUrl;
+    } else if (data.name === '') {
+      data.name = user.name;
+    } else if (data.password === '') {
+      user.name = data?.name;
+      user.photoUrl = data?.photoUrl;
+      await this.userRepository.save(user);
+    }
+    if (data.password) {
+      await this.userRepository.update(
+        { id },
+        { password: hashSync(data.password, 10) },
+      );
+    }
+    await this.userRepository.update(
+      { id },
+      {
+        name: data?.name,
+        photoUrl: data?.photoUrl,
+      },
+    );
     const userUpdated = this.userRepository.create({ ...user, ...data });
 
     return userUpdated;
@@ -94,9 +120,12 @@ export class UserService {
 
   async deleteUser(id: string): Promise<boolean> {
     const user = await this.findUserById(id);
-
     if (user) {
-      await this.userRepository.delete(id);
+      user.confirmed = false;
+
+      const userRemoved = this.userRepository.create(user);
+      await this.userRepository.update({ ...user }, { ...userRemoved });
+      //await this.userRepository.delete(id);
       return true;
     }
     return false;
